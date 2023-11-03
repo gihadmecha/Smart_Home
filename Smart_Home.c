@@ -150,6 +150,46 @@ static void Smart_Home ()
 			Smart_Home_instructionDone();
 		}
 	}
+	else if (Smart_Home_instructionCompare("ledon"))
+	{
+		if (Smart_Home_searchEnter())
+		{
+			switch (Smart_Home_operatorStringToNumber())
+			{
+			case 1:
+			LED1_On();
+			break;
+			case 2:
+			LED2_On();
+			break;
+			case 3:
+			LED3_On();
+			break;
+			}
+			
+			Smart_Home_instructionDone();
+		}
+	}
+	else if (Smart_Home_instructionCompare("ledoff"))
+	{
+		if (Smart_Home_searchEnter())
+		{
+			switch (Smart_Home_operatorStringToNumber())
+			{
+				case 1:
+				LED1_Off();
+				break;
+				case 2:
+				LED2_Off();
+				break;
+				case 3:
+				LED3_Off();
+				break;
+			}
+			
+			Smart_Home_instructionDone();
+		}
+	}
 	else
 	{
 		if (Smart_Home_searchEnter ())
