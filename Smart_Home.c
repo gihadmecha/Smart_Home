@@ -85,7 +85,7 @@ static s32 Smart_Home_operatorStringToNumber ()
 	}
 	else
 	{
-		number += operator[0];
+		number += operator[0] - '0';
 	}
 	
 	for (u8 index = 1; operator[index]; index++)
