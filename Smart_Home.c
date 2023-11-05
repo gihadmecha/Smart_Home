@@ -3,46 +3,27 @@
 
 static char recievedString[20] = {0};
 static char instruction[20] = {0};
-static char	operator[20] = {0};
-	
-	
-static u8 firstCharLcdFlag = 1;
+static char operator[20] = {0};
 
 extern void Smart_Home_Init ()
 {
 	DIO_Init();
+	UART_Init();
 	TIMER1_OCR1A_WRITE(TIMER1_TOP_VALUE);
 	SERVO_setAngle(0);
 	TIMER1_Init(TIMER1_PRESCALER_8, TIMER1_FAST_PWM_OCR1A_TOP, TIMER1_OC1A_DISCONNECTED, TIMER1_OC1B_CLEAR_ON_COMPARE_MATCH);
-	UART_Init();
 	
 	LCD_Init();
 	
 	SEI ();
 	UART_RecieverEnable();
 	
-	Smart_Home_instructionDone ();
+	UART_recieveString_Asyncronous (recievedString);
 }
 
 extern void Smart_Home_Run ()
 {
-	UART_recieveString_Asyncronous (recievedString);
-	//LCD_GoTo(0, 0);
-	//LCD_WriteString(recievedString);
-	
 	Smart_Home_stringAnalysis ();
-	
-	//LCD_GoTo(1, 0);
-	//LCD_WriteString(instruction);
-	//
-	//LCD_GoTo(1, 7);
-	//LCD_WriteString(operator);
-	
-	//if (Smart_Home_searchEnter ())
-	//{
-		//Smart_Home_instructionDone();
-		//LCD_Clear();
-	//}
 	
 	Smart_Home ();
 }
@@ -109,6 +90,8 @@ static void Smart_Home_instructionDone ()
 		instruction[index] = NULL;
 		operator[index] = NULL;
 	}
+	
+	UART_recieveString_Asyncronous (recievedString);
 }
 
 static u8 Smart_Home_searchEnter ()
@@ -126,53 +109,34 @@ static u8 Smart_Home_searchEnter ()
 
 static void Smart_Home ()
 {
-	if (Smart_Home_instructionCompare("lcd"))
+	if (Smart_Home_searchEnter())
 	{
-		if (operator[0] != NULL && operator[1] == NULL && firstCharLcdFlag == 1)
+		if (Smart_Home_instructionCompare("lcd"))
 		{
-			firstCharLcdFlag = 0;
 			LCD_Clear();
+			LCD_GoTo(0, 0);
+			LCD_WriteString(operator);
 		}
-		LCD_GoTo(0, 0);
-		LCD_WriteString(operator);
-		
-		if (Smart_Home_searchEnter ())
-		{
-			Smart_Home_instructionDone();
-			firstCharLcdFlag = 1;
-		}
-	}
-	else if (Smart_Home_instructionCompare("servo"))
-	{
-		if (Smart_Home_searchEnter ())
+		else if (Smart_Home_instructionCompare("servo"))
 		{
 			SERVO_setAngle(Smart_Home_operatorStringToNumber ());
-			Smart_Home_instructionDone();
 		}
-	}
-	else if (Smart_Home_instructionCompare("ledon"))
-	{
-		if (Smart_Home_searchEnter())
+		else if (Smart_Home_instructionCompare("ledon"))
 		{
 			switch (Smart_Home_operatorStringToNumber())
 			{
-			case 1:
-			LED1_On();
-			break;
-			case 2:
-			LED2_On();
-			break;
-			case 3:
-			LED3_On();
-			break;
+				case 1:
+				LED1_On();
+				break;
+				case 2:
+				LED2_On();
+				break;
+				case 3:
+				LED3_On();
+				break;
 			}
-			
-			Smart_Home_instructionDone();
 		}
-	}
-	else if (Smart_Home_instructionCompare("ledoff"))
-	{
-		if (Smart_Home_searchEnter())
+		else if (Smart_Home_instructionCompare("ledoff"))
 		{
 			switch (Smart_Home_operatorStringToNumber())
 			{
@@ -186,16 +150,9 @@ static void Smart_Home ()
 				LED3_Off();
 				break;
 			}
-			
-			Smart_Home_instructionDone();
 		}
-	}
-	else
-	{
-		if (Smart_Home_searchEnter ())
-		{
-			Smart_Home_instructionDone();
-		}
+		
+		Smart_Home_instructionDone();
 	}
 }
 
